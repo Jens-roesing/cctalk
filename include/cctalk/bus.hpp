@@ -63,6 +63,7 @@ namespace cctalk {
         virtual ~Bus() = default;
 
         bool open(const char *path);
+        void close();
 
         bool ready();
         operator bool();

@@ -16,6 +16,20 @@ namespace cctalk {
         return true;
     }
 
+    void Bus::close() {
+    boost::system::error_code errorCode;
+    serialPort.close(errorCode);
+
+    if (errorCode) {
+        std::cerr << "Error closing serial port: " << errorCode.message() << std::endl;
+    }
+
+    // Reset state variables
+    std::lock_guard lock(readCallbackMutex);
+    readCallbacks.clear();
+    isReading = false;
+    }
+
     void Bus::configure() {
         using boost::asio::serial_port_base;
         serialPort.set_option(serial_port_base::baud_rate(9600));
