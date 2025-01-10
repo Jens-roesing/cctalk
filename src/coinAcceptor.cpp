@@ -84,8 +84,9 @@ namespace cctalk {
                     std::cout << "initializeSupportedCoins" << std::endl;
                     return initializeSupportedCoins(std::move(callback));
                 }
+                std::cout << "Error: CoinAcceptor, received bus command, but equipmentCategory is not \"Coin Acceptor\"!" << std::endl;
             }
-            std::cout << "CoinAcceptor: validateEquipmentCategory failed!" << std::endl;
+            std::cout << "Error: CoinAcceptor, validateEquipmentCategory failed!" << std::endl;
             return callback(false);
         });
     }
@@ -115,7 +116,7 @@ namespace cctalk {
                     initializeCounter(std::move(callback));
                 }
             } else {
-                std::cout << "CoinAcceptor: addLeftSupportedCoins failed!" << std::endl;
+                std::cout << "Error: CoinAcceptor, addLeftSupportedCoins failed!" << std::endl;
                 callback(false);
             }
         });
@@ -148,7 +149,7 @@ namespace cctalk {
                 validated = true;
                 callback(true);
             } else {
-                std::cout << "CoinAcceptor: initializeCounter failed!" << std::endl;
+                std::cout << "Error: CoinAcceptor, initializeCounter failed!" << std::endl;
                 callback(false);
             }
         });
@@ -206,7 +207,7 @@ namespace cctalk {
             if (success) {
                 setMasterInhibitState(true, std::move(callback));
             } else {
-                std::cout << "CoinAcceptor: activateInhibitState failed!" << std::endl;
+                std::cout << "Error: CoinAcceptor, activateInhibitState failed!" << std::endl;
                 callback(false);
             }
         });
