@@ -18,16 +18,12 @@ namespace cctalk {
 
     void Bus::close() {
     boost::system::error_code errorCode;
+    cancelReading();
     serialPort.close(errorCode);
 
     if (errorCode) {
         std::cerr << "Error closing serial port: " << errorCode.message() << std::endl;
     }
-
-    // Reset state variables
-    std::lock_guard lock(readCallbackMutex);
-    readCallbacks.clear();
-    isReading = false;
     }
 
     void Bus::configure() {
