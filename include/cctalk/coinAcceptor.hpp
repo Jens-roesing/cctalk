@@ -21,7 +21,7 @@ namespace cctalk {
         void stop();
 
         void setCoinCallback(const std::function<void (const Coin &)>);
-        void setBus(cctalk::Bus &newBus);
+        void setBus(cctalk::Bus *newBus);
 
     private:
         void initialize(const std::function<void (bool)> &&callback);
@@ -50,7 +50,7 @@ namespace cctalk {
         void enterPollLoop();
         void handlePollLoop(std::optional<Bus::DataCommand> command);
 
-        cctalk::Bus &bus;
+        cctalk::Bus *bus;
         unsigned char destinationAddress = 0;
         unsigned char sourceAddress = 0;
 

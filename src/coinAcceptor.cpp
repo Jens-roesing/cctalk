@@ -284,7 +284,7 @@ namespace cctalk {
         }
     }
 
-    void CoinAcceptor::setBus(cctalk::Bus &newBus) {
+    void CoinAcceptor::setBus(cctalk::Bus *newBus) {
     bus = newBus;
     }
 }
