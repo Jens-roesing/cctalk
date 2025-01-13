@@ -76,7 +76,7 @@ namespace cctalk {
         auto command = createCommand(Bus::REQUEST_EQUIPMENT_CATEGORY_ID);
 
         if (!bus.ready()) {
-            std::cout << "Error: CoinAcceptor, serial bus is invalid" << endl;
+            std::cout << "Error: CoinAcceptor, serial bus is invalid" << std::endl;
             return callback(false);
         }
 
