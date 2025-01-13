@@ -75,6 +75,11 @@ namespace cctalk {
     void CoinAcceptor::validateEquipmentCategory(const std::function<void (bool)> &&callback) {
         auto command = createCommand(Bus::REQUEST_EQUIPMENT_CATEGORY_ID);
 
+        if (!bus.ready()) {
+        Log::getLog().printError("Error: CoinAcceptor, serial bus is invalid");
+        return callback(false);
+        }
+
         bus.send(std::move(command));
 
         bus.receive(sourceAddress, [this, callback] (std::optional<Bus::DataCommand> command) {
@@ -277,5 +282,9 @@ namespace cctalk {
                 enterPollLoop();
             }
         }
+    }
+
+    void CoinAcceptor::setBus(cctalk::Bus &newBus) {
+    bus = newBus;
     }
 }
