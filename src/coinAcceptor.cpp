@@ -72,26 +72,36 @@ namespace cctalk {
         validateEquipmentCategory(std::move(callback));
     }
 
-    void CoinAcceptor::validateEquipmentCategory(const std::function<void (bool)> &&callback) {
+    void CoinAcceptor::validateEquipmentCategory(std::function<void (bool)> callback) {
         auto command = createCommand(Bus::REQUEST_EQUIPMENT_CATEGORY_ID);
-
+    
         if (!bus.ready()) {
             std::cout << "Error: CoinAcceptor, serial bus is invalid" << std::endl;
             return callback(false);
         }
-
+    
         bus.send(std::move(command));
-
-        bus.receive(sourceAddress, [this, callback] (std::optional<Bus::DataCommand> command) {
-            if (command) {
-                std::string_view equipmentCategory(reinterpret_cast<char*>(command->data), command->length);
-                if (equipmentCategory == "Coin Acceptor") {
-                    std::cout << "initializeSupportedCoins" << std::endl;
-                    return initializeSupportedCoins(std::move(callback));
-                }
-                std::cout << "Error: CoinAcceptor, received bus command, but equipmentCategory is not \"Coin Acceptor\"!" << std::endl;
+    
+        bus.receive(sourceAddress, [this, callback = std::move(callback)] (std::optional<Bus::DataCommand> command) mutable {
+            if (!command) {
+                std::cout << "Error: CoinAcceptor, validateEquipmentCategory failed! No response received." << std::endl;
+                return callback(false);
             }
-            std::cout << "Error: CoinAcceptor, validateEquipmentCategory failed!" << std::endl;
+    
+            if (command->length == 0) {
+                std::cout << "Error: CoinAcceptor, received empty response for equipment category!" << std::endl;
+                return callback(false);
+            }
+    
+            std::string_view equipmentCategory(reinterpret_cast<char*>(command->data), command->length);
+            std::cout << "Received equipment category: [" << equipmentCategory << "]" << std::endl;
+    
+            if (equipmentCategory == "Coin Acceptor") {
+                std::cout << "initializeSupportedCoins" << std::endl;
+                return initializeSupportedCoins(std::move(callback));
+            }
+    
+            std::cout << "Error: CoinAcceptor, received invalid equipment category: [" << equipmentCategory << "]" << std::endl;
             return callback(false);
         });
     }
