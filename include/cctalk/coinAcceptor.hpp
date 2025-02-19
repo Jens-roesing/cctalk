@@ -24,7 +24,7 @@ namespace cctalk {
 
     private:
         void initialize(const std::function<void (bool)> &&callback);
-        void validateEquipmentCategory(const std::function<void (bool)> &&callback);
+        void validateEquipmentCategory(std::function<void (bool)> callback);
         void initializeSupportedCoins(const std::function<void (bool)> &&callback);
         void initializeCounter(const std::function<void (bool)> &&callback);
 
