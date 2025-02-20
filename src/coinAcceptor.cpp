@@ -254,7 +254,7 @@ namespace cctalk {
         for (int coinNo = 0; coinNo < supportedCoins.size(); coinNo++) {
             std::cout << "<CCTalk> checking: " << supportedCoins[coinNo] << std::endl;
             if (isWantedCoin(supportedCoins[coinNo])) {
-                std::cout << supportedCoins[coinNo] << " is Wanted coin" << std::endl;
+                std::cout << "<CCTalk> " << supportedCoins[coinNo] << " is Wanted coin" << std::endl;
                 inhibitState[coinNo >> 3] |= 1 << ((coinNo) & 0b111);
             }
         }

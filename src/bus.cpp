@@ -17,13 +17,32 @@ namespace cctalk {
     }
 
     void Bus::close() {
-    boost::system::error_code errorCode;
-    cancelReading();
-    serialPort.close(errorCode);
-
-    if (errorCode) {
-        std::cerr << "<CCTalk> Error closing serial port: " << errorCode.message() << std::endl;
-    }
+        boost::system::error_code errorCode;
+    
+        if (serialPort.is_open()) {
+            std::cout << "<CCTalk> Closing serial port..." << std::endl;
+    
+            // stop async operations
+            serialPort.cancel(errorCode);
+            if (errorCode) {
+                std::cerr << "<CCTalk> Error canceling serial port: " << errorCode.message() << std::endl;
+            }
+            else {
+                std::cout << "<CCTalk> Serial port async operations closed successfully." << std::endl;
+            }
+    
+            cancelReading();
+    
+            // close port
+            serialPort.close(errorCode);
+            if (errorCode) {
+                std::cerr << "<CCTalk> Error closing serial port: " << errorCode.message() << std::endl;
+            } else {
+                std::cout << "<CCTalk> Serial port closed successfully." << std::endl;
+            }
+        } else {
+            std::cout << "<CCTalk> Serial port already closed." << std::endl;
+        }
     }
 
     void Bus::configure() {
