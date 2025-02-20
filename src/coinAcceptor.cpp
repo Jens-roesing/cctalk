@@ -76,7 +76,7 @@ namespace cctalk {
         auto command = createCommand(Bus::REQUEST_EQUIPMENT_CATEGORY_ID);
     
         if (!bus.ready()) {
-            std::cout << "Error: CoinAcceptor, serial bus is invalid" << std::endl;
+            std::cout << "<CCTalk> Error: CoinAcceptor, serial bus is invalid" << std::endl;
             return callback(false);
         }
     
@@ -84,24 +84,24 @@ namespace cctalk {
     
         bus.receive(sourceAddress, [this, callback = std::move(callback)] (std::optional<Bus::DataCommand> command) mutable {
             if (!command) {
-                std::cout << "Error: CoinAcceptor, validateEquipmentCategory failed! No response received." << std::endl;
+                std::cout << "<CCTalk> Error: CoinAcceptor, validateEquipmentCategory failed! No response received." << std::endl;
                 return callback(false);
             }
     
             if (command->length == 0) {
-                std::cout << "Error: CoinAcceptor, received empty response for equipment category!" << std::endl;
+                std::cout << "<CCTalk> Error: CoinAcceptor, received empty response for equipment category!" << std::endl;
                 return callback(false);
             }
     
             std::string_view equipmentCategory(reinterpret_cast<char*>(command->data), command->length);
-            std::cout << "Received equipment category: [" << equipmentCategory << "]" << std::endl;
+            std::cout << "<CCTalk> Received equipment category: [" << equipmentCategory << "]" << std::endl;
     
             if (equipmentCategory == "Coin Acceptor") {
-                std::cout << "initializeSupportedCoins" << std::endl;
+                std::cout << "<CCTalk> initializeSupportedCoins" << std::endl;
                 return initializeSupportedCoins(std::move(callback));
             }
     
-            std::cout << "Error: CoinAcceptor, received invalid equipment category: [" << equipmentCategory << "]" << std::endl;
+            std::cout << "<CCTalk> Error: CoinAcceptor, received invalid equipment category: [" << equipmentCategory << "]" << std::endl;
             return callback(false);
         });
     }
@@ -131,7 +131,7 @@ namespace cctalk {
                     initializeCounter(std::move(callback));
                 }
             } else {
-                std::cout << "Error: CoinAcceptor, addLeftSupportedCoins failed!" << std::endl;
+                std::cout << "<CCTalk> Error: CoinAcceptor, addLeftSupportedCoins failed!" << std::endl;
                 callback(false);
             }
         });
@@ -146,7 +146,7 @@ namespace cctalk {
             if (auto value = Coin::makeValue(coinCode.data() + 2)) {
                 if (auto revision = Coin::makeRevision(coinCode[5])) {
                     supportedCoins.emplace_back(currency, value, revision);
-                    std::cout << "added " << supportedCoins.back() << " with id " << supportedCoins.size() << std::endl;
+                    std::cout << "<CCTalk> added " << supportedCoins.back() << " with id " << supportedCoins.size() << std::endl;
                     return true;
                 }
             }
@@ -164,7 +164,7 @@ namespace cctalk {
                 validated = true;
                 callback(true);
             } else {
-                std::cout << "Error: CoinAcceptor, initializeCounter failed!" << std::endl;
+                std::cout << "<CCTalk> Error: CoinAcceptor, initializeCounter failed!" << std::endl;
                 callback(false);
             }
         });
@@ -222,7 +222,7 @@ namespace cctalk {
             if (success) {
                 setMasterInhibitState(true, std::move(callback));
             } else {
-                std::cout << "Error: CoinAcceptor, activateInhibitState failed!" << std::endl;
+                std::cout << "<CCTalk> Error: CoinAcceptor, activateInhibitState failed!" << std::endl;
                 callback(false);
             }
         });
@@ -252,7 +252,7 @@ namespace cctalk {
         std::memset(inhibitState.data(), 0, inhibitState.size());
 
         for (int coinNo = 0; coinNo < supportedCoins.size(); coinNo++) {
-            std::cout << "checking: " << supportedCoins[coinNo] << std::endl;
+            std::cout << "<CCTalk> checking: " << supportedCoins[coinNo] << std::endl;
             if (isWantedCoin(supportedCoins[coinNo])) {
                 std::cout << supportedCoins[coinNo] << " is Wanted coin" << std::endl;
                 inhibitState[coinNo >> 3] |= 1 << ((coinNo) & 0b111);
@@ -276,9 +276,9 @@ namespace cctalk {
                     if (coinCallback) {
                         coinCallback(supportedCoins[lastCoinId - 1]);
                     }
-                    std::cout << "got " << supportedCoins[lastCoinId - 1] << std::endl;
+                    std::cout << "<CCTalk> got " << supportedCoins[lastCoinId - 1] << std::endl;
                 } else {
-                    std::cout << "got invalid coin" << std::endl;
+                    std::cout << "<CCTalk> got invalid coin" << std::endl;
                 }
             }
 

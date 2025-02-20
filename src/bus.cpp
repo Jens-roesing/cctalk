@@ -22,7 +22,7 @@ namespace cctalk {
     serialPort.close(errorCode);
 
     if (errorCode) {
-        std::cerr << "Error closing serial port: " << errorCode.message() << std::endl;
+        std::cerr << "<CCTalk> Error closing serial port: " << errorCode.message() << std::endl;
     }
     }
 
