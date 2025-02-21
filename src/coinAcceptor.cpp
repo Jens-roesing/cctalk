@@ -312,7 +312,7 @@ namespace cctalk {
     
             // After fetching the supported coins, enable them
             for (const auto& coin : supportedCoins) {
-                cctalk::Coin coinToEnable(coin.currency, coin.value);
+                cctalk::Coin coinToEnable(coin.getCurrency(), coin.getValue());
                 enableCoin(coinToEnable);
             }
     
