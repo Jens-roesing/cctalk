@@ -21,6 +21,7 @@ namespace cctalk {
         void stop();
 
         void setCoinCallback(const std::function<void (const Coin &)>);
+        void updateCurrency(const std::string& newCurrency);
 
     private:
         void initialize(const std::function<void (bool)> &&callback);

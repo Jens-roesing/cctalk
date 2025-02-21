@@ -293,4 +293,40 @@ namespace cctalk {
             }
         }
     }
+
+    void CoinAcceptor::updateCurrency(const std::string& newCurrency) {
+        // Disable all coins
+        for (const auto& coin : enabledCoins) {
+            disableCoin(coin);
+        }
+        enabledCoins.clear();
+    
+        // Fetch new supported coins from the device
+        validateEquipmentCategory([this, newCurrency](bool success) {
+            if (!success) {
+                std::cout << "<CCTalk> Error: Could not validate equipment category" << std::endl;
+                return;
+            }
+    
+            // After fetching the supported coins, activate only the ones matching the new currency
+            enabledCoins.clear();
+            for (const auto& coin : supportedCoins) {
+                if (coin.currency == newCurrency) {
+                    // Use the enableCoin method with a Coin object
+                    cctalk::Coin coinToEnable(cctalk::Coin::makeCurrency(coin.currency), coin.value);
+                    enableCoin(coinToEnable);
+                    enabledCoins.push_back(coinToEnable);
+                }
+            }
+    
+            // Update inhibit state
+            setInhibitState(generateInhibitState(), [](bool success) {
+                if (success) {
+                    std::cout << "<CCTalk> Currency updated successfully" << std::endl;
+                } else {
+                    std::cout << "<CCTalk> Error updating currency" << std::endl;
+                }
+            });
+        });
+    }
 }
