@@ -299,9 +299,8 @@ namespace cctalk {
         for (const auto& coin : enabledCoins) {
             disableCoin(coin);
         }
+
         enabledCoins.clear();
-    
-        // Clear the supported coins to refresh them with the latest from the device
         supportedCoins.clear();
     
         // Fetch new supported coins from the device
@@ -311,19 +310,10 @@ namespace cctalk {
                 return;
             }
     
-            // After fetching the supported coins, activate only the ones matching the new currency
-            for (const auto& coin : supportedCoins) {    
-                // Compare the coin currency with newCurrency
-                if (coin.currency == cctalk::Coin::makeCurrency(newCurrency)) {
-                    // Use the makeValue function to match the coin value
-                    unsigned int value = cctalk::Coin::makeValue(coin.value);
-                    
-                    // Create the Coin object with the matched currency and value
-                    cctalk::Coin coinToEnable(cctalk::Coin::makeCurrency(coin.currency), value);
-                    
-                    // Enable the coin (this will handle adding to enabledCoins)
-                    enableCoin(coinToEnable);
-                }
+            // After fetching the supported coins, enable them
+            for (const auto& coin : supportedCoins) {
+                cctalk::Coin coinToEnable(coin.currency, coin.value);
+                enableCoin(coinToEnable);
             }
     
             // Update inhibit state
@@ -335,5 +325,5 @@ namespace cctalk {
                 }
             });
         });
-    } 
+    }    
 }
