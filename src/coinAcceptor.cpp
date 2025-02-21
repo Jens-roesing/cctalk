@@ -311,9 +311,18 @@ namespace cctalk {
             // After fetching the supported coins, activate only the ones matching the new currency
             enabledCoins.clear();
             for (const auto& coin : supportedCoins) {
-                if (coin.currency == newCurrency) {
-                    // Use the enableCoin method with a Coin object
-                    cctalk::Coin coinToEnable(cctalk::Coin::makeCurrency(coin.currency), coin.value);
+                // Use the new makeCurrency function to match the newCurrency
+                unsigned short currency = cctalk::Coin::makeCurrency(coin.currency.c_str());
+    
+                // Compare the coin currency with newCurrency
+                if (currency == cctalk::Coin::makeCurrency(newCurrency.c_str())) {
+                    // Use the makeValue function to match the coin value
+                    unsigned int value = cctalk::Coin::makeValue(coin.value.c_str());
+                    
+                    // Create the Coin object with the matched currency and value
+                    cctalk::Coin coinToEnable(currency, value);
+                    
+                    // Enable the coin
                     enableCoin(coinToEnable);
                     enabledCoins.push_back(coinToEnable);
                 }
