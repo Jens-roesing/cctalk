@@ -330,17 +330,18 @@ namespace cctalk {
         unsigned char coinId = 1;
         supportedCoins.clear();
     
-        auto fetchNextCoin = [this, &coinId, callback = std::move(callback)]() mutable {
+        // save function, to prepare resursive call
+        std::function<void()> fetchNextCoin = [&]() {
             auto command = createDataCommand(Bus::REQUEST_COIN_ID, &coinId, 1);
     
             bus.send(command);
-            bus.receive(sourceAddress, [this, &coinId, callback](std::optional<Bus::DataCommand> command) mutable {
+            bus.receive(sourceAddress, [this, &coinId, &fetchNextCoin, callback](std::optional<Bus::DataCommand> command) mutable {
                 if (command) {
                     std::string_view coinCode(reinterpret_cast<char*>(command->data), command->length);
                     if (addSupportedCoin(coinCode)) {
                         std::cout << "<CCTalk> Successfully added coin with id: " << coinId << std::endl;
-                        coinId++;  
-                        fetchNextCoin();
+                        coinId++;
+                        fetchNextCoin(); // call recursive
                     } else {
                         std::cout << "<CCTalk> No more coins or invalid coin data." << std::endl;
                         callback(true);
@@ -352,7 +353,7 @@ namespace cctalk {
             });
         };
     
-        // start fetching
+        // start call
         fetchNextCoin();
-    }    
+    }   
 }
