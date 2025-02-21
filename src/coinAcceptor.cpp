@@ -299,18 +299,17 @@ namespace cctalk {
         for (const auto& coin : enabledCoins) {
             disableCoin(coin);
         }
-
+    
         enabledCoins.clear();
-        supportedCoins.clear();
     
         // Fetch new supported coins from the device
-        validateEquipmentCategory([this, newCurrency](bool success) {
+        addAllSupportedCoins([this](bool success) {
             if (!success) {
-                std::cout << "<CCTalk> Error: Could not validate equipment category" << std::endl;
+                std::cout << "<CCTalk> Error: Could not fetch supported coins" << std::endl;
                 return;
             }
     
-            // After fetching the supported coins, enable them
+            // Enable the newly fetched coins
             for (const auto& coin : supportedCoins) {
                 cctalk::Coin coinToEnable(coin.getCurrency(), coin.getValue());
                 enableCoin(coinToEnable);
@@ -325,5 +324,35 @@ namespace cctalk {
                 }
             });
         });
+    }
+
+    void CoinAcceptor::addAllSupportedCoins(const std::function<void(bool)> &&callback) {
+        unsigned char coinId = 1;
+        supportedCoins.clear();
+    
+        auto fetchNextCoin = [this, &coinId, callback = std::move(callback)]() mutable {
+            auto command = createDataCommand(Bus::REQUEST_COIN_ID, &coinId, 1);
+    
+            bus.send(command);
+            bus.receive(sourceAddress, [this, &coinId, callback](std::optional<Bus::DataCommand> command) mutable {
+                if (command) {
+                    std::string_view coinCode(reinterpret_cast<char*>(command->data), command->length);
+                    if (addSupportedCoin(coinCode)) {
+                        std::cout << "<CCTalk> Successfully added coin with id: " << coinId << std::endl;
+                        coinId++;  
+                        fetchNextCoin();
+                    } else {
+                        std::cout << "<CCTalk> No more coins or invalid coin data." << std::endl;
+                        callback(true);
+                    }
+                } else {
+                    std::cout << "<CCTalk> Error: Failed to receive coin data for id: " << coinId << std::endl;
+                    callback(false);
+                }
+            });
+        };
+    
+        // start fetching
+        fetchNextCoin();
     }    
 }
