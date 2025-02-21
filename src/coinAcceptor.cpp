@@ -294,12 +294,15 @@ namespace cctalk {
         }
     }
 
-    void CoinAcceptor::updateCurrency(const std::string& newCurrency) {
+    void CoinAcceptor::updateCurrency(const char* newCurrency) {
         // Disable all coins
         for (const auto& coin : enabledCoins) {
             disableCoin(coin);
         }
         enabledCoins.clear();
+    
+        // Clear the supported coins to refresh them with the latest from the device
+        supportedCoins.clear();
     
         // Fetch new supported coins from the device
         validateEquipmentCategory([this, newCurrency](bool success) {
@@ -309,22 +312,17 @@ namespace cctalk {
             }
     
             // After fetching the supported coins, activate only the ones matching the new currency
-            enabledCoins.clear();
-            for (const auto& coin : supportedCoins) {
-                // Use the new makeCurrency function to match the newCurrency
-                unsigned short currency = cctalk::Coin::makeCurrency(coin.currency.c_str());
-    
+            for (const auto& coin : supportedCoins) {    
                 // Compare the coin currency with newCurrency
-                if (currency == cctalk::Coin::makeCurrency(newCurrency.c_str())) {
+                if (coin.currency == cctalk::Coin::makeCurrency(newCurrency)) {
                     // Use the makeValue function to match the coin value
-                    unsigned int value = cctalk::Coin::makeValue(coin.value.c_str());
+                    unsigned int value = cctalk::Coin::makeValue(coin.value);
                     
                     // Create the Coin object with the matched currency and value
-                    cctalk::Coin coinToEnable(currency, value);
+                    cctalk::Coin coinToEnable(cctalk::Coin::makeCurrency(coin.currency), value);
                     
-                    // Enable the coin
+                    // Enable the coin (this will handle adding to enabledCoins)
                     enableCoin(coinToEnable);
-                    enabledCoins.push_back(coinToEnable);
                 }
             }
     
@@ -337,5 +335,5 @@ namespace cctalk {
                 }
             });
         });
-    }
+    } 
 }
